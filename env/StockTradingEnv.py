@@ -13,6 +13,16 @@ MAX_STEPS = 20000
 
 INITIAL_ACCOUNT_BALANCE = 10000
 
+MAX_CPU_CYCLES = 8
+MAX_ENERGY_UNITS = 8
+MAX_BANDWIDTH = 8
+MAX_STORAGE = 8
+MAX_ALLOWED_TASK = 2
+MAX_STEPS = 100
+
+INITIAL_REWARD_BALANCE = 0
+
+
 
 class StockTradingEnv(gym.Env):
     """A stock trading environment for OpenAI gym"""
@@ -22,7 +32,7 @@ class StockTradingEnv(gym.Env):
         super(StockTradingEnv, self).__init__()
 
         self.df = df
-        self.reward_range = (0, MAX_ACCOUNT_BALANCE)
+        self.reward_range = (0, MAX_RESOURCES)
 
         # Actions of the format Buy x%, Sell x%, Hold, etc.
         self.action_space = spaces.Box(
@@ -30,7 +40,7 @@ class StockTradingEnv(gym.Env):
 
         # Prices contains the OHCL values for the last five prices
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(6, 6), dtype=np.float16)
+            low=0, high=1, shape=(7, 7), dtype=np.float16)
 
     def _next_observation(self):
         # Get the stock data points for the last 5 days and scale to between 0-1
@@ -43,6 +53,33 @@ class StockTradingEnv(gym.Env):
                         5, 'Low'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step: self.current_step +
                         5, 'Close'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'Volume'].values / MAX_NUM_SHARES,
+        ])
+
+        # Append additional data and scale each value to between 0-1
+        obs = np.append(frame, [[
+            self.balance / MAX_ACCOUNT_BALANCE,
+            self.max_net_worth / MAX_ACCOUNT_BALANCE,
+            self.shares_held / MAX_NUM_SHARES,
+            self.cost_basis / MAX_SHARE_PRICE,
+            self.total_shares_sold / MAX_NUM_SHARES,
+            self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE),
+        ]], axis=0)
+
+        return obs
+    
+    def _next_task_observation(self):
+        # Get the stock data points for the last 5 days and scale to between 0-1
+        frame = np.array([
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'cpu_cycles'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'energy_units'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'network_bandwidth'].values / MAX_SHARE_PRICE,
+            self.df.loc[self.current_step: self.current_step +
+                        5, 'storage_space'].values / MAX_SHARE_PRICE,
             self.df.loc[self.current_step: self.current_step +
                         5, 'Volume'].values / MAX_NUM_SHARES,
         ])
@@ -132,7 +169,8 @@ class StockTradingEnv(gym.Env):
     def render(self, mode='human', close=False):
         # Render the environment to the screen
         profit = self.net_worth - INITIAL_ACCOUNT_BALANCE
-
+        REWARD_VALUES.append(profit)
+        
         print(f'Step: {self.current_step}')
         print(f'Balance: {self.balance}')
         print(
@@ -142,3 +180,4 @@ class StockTradingEnv(gym.Env):
         print(
             f'Net worth: {self.net_worth} (Max net worth: {self.max_net_worth})')
         print(f'Profit: {profit}')
+        
