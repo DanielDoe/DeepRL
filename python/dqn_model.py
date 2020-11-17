@@ -155,7 +155,7 @@ class DQN(object):
                                          K.learning_phase(): 0})
                 print("error:", np.mean(error))
                 action = self.predict_action(task_data[t])
-                print("portfolio:", action)
+                print("steps:", action)
                 print ("elapsed time", time.time() - st)
                 print("********************************************************************")
                 

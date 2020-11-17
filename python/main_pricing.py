@@ -4,17 +4,20 @@ import pandas as pd
 import time
 import sys
 # local library
-import task_utils
+from task_utils import task_generator
 import ddpg_dqn_pricing_config
 
-def main(arg):
-    input_data = task_utils.df
+#print(df[:700].values[0])
 
-    train_input = input_data[:700]
-    test_input = input_data[700:]
+def main(arg):
+    df = pd.DataFrame(task_generator(), columns=['date_time', 'cs_name', 'cpu_cycles',
+'energy_units', 'network_bandwidth', 'storage_space', 'duration', 'price'])
+    df.drop(['date_time', 'cs_name'], axis=1, inplace=True)
+    train_input = df[:700]
+    test_input = df[700:]
     
     # training
-    n_task = len(train_input)
+    n_task = len(train_input.values[0])
     sys.path.append("./model")
     print(arg)
 
@@ -57,8 +60,8 @@ def main(arg):
         count += 1
         if count%10 == 0:
             print('time:', index[i])
-            print('portfolio:', action)
-            print('profit:', prof)
+            print('actions:', action)
+            print('pred:', prof)
         print('***************************')
         for i in range(100):
             ddpg.update_weight()

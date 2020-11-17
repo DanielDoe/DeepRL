@@ -1,7 +1,9 @@
+import os
+data_dir = os.getcwd()
 class DDPGConfig(object):
     def __init__(self, n_task):
         self.device = '/gpu:0'
-        self.save_path = '/Users/doe/Projects/DeepRL/python/'
+        self.save_path = data_dir+'/data'
         self.is_load = False
         self.gamma = 1.0
         self.history_length = 10
@@ -45,7 +47,7 @@ class DDPGConfig(object):
 class DQNConfig(object):
     def __init__(self, n_task):
         self.device = '/gpu:0'
-        self.save_path = '/Users/doe/Projects/DeepRL/python/'
+        self.save_path = data_dir+'/data'
         self.is_load = False
         self.gamma = 0.999
         self.history_length = 10
