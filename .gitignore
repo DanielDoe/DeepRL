@@ -1,4 +1,4 @@
 .vscode
-python/data/
+python/data/*
 python/__pycache__
 python/task_price.csv
