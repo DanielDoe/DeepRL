@@ -2,4 +2,3 @@
 python/data/*
 !python/data/.gitkeep
 python/__pycache__
-python/task_price.csv
